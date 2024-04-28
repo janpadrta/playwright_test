@@ -1,35 +1,29 @@
 import { test, expect } from '@playwright/test';
 
+test.describe.configure({ mode: 'parallel' });
+
 test('has title', async ({ page }) => {
   await page.goto('https://www.saucedemo.com');
 
-  // Expect a title "to contain" a substring.
   await expect(page).toHaveTitle(/Swag Labs/);
 });
 
+// login
 test('login standard_user', async ({ page }) => {
-  await page.goto('https://www.saucedemo.com');
-
-  await page.getByPlaceholder('Username').fill('standard_user');
-  await page.getByPlaceholder('Password').fill('secret_sauce');
-  await page.getByRole('button').click();
+  prihlaseni(page, 'standard_user', 'secret_sauce');
   
   await expect(page.locator('[data-test="inventory-container"]')).toContainText('Sauce Labs Fleece Jacket');
   await expect(page.locator('[data-test="secondary-header"]')).toContainText('Products');
 });
 
 test('login problem_user', async ({ page }) => {
-  await page.goto('https://www.saucedemo.com');
-
-  await page.getByPlaceholder('Username').fill('problem_user');
-  await page.getByPlaceholder('Password').fill('secret_sauce');
-  await page.getByRole('button').click();
+  prihlaseni(page, 'problem_user', 'secret_sauce');
   
   await expect(page.locator('[data-test="inventory-container"]')).toContainText('Sauce Labs Fleece Jacket');
   await expect(page.locator('[data-test="secondary-header"]')).toContainText('Products');
 });
 
-test('login performance_glitch_user', async ({ page }) => {
+test('login performance_glitch_user', async ({ page }) => {  
   await page.goto('https://www.saucedemo.com');
 
   await page.getByPlaceholder('Username').fill('performance_glitch_user');
@@ -41,12 +35,63 @@ test('login performance_glitch_user', async ({ page }) => {
 });
 
 test('login error_user', async ({ page }) => {
-  await page.goto('https://www.saucedemo.com');
-
-  await page.getByPlaceholder('Username').fill('error_user');
-  await page.getByPlaceholder('Password').fill('secret_sauce');
-  await page.getByRole('button').click();
+  prihlaseni(page, 'error_user', 'secret_sauce');
   
   await expect(page.locator('[data-test="inventory-container"]')).toContainText('Sauce Labs Fleece Jacket');
   await expect(page.locator('[data-test="secondary-header"]')).toContainText('Products');
 });
+
+// picture visibility
+test('picture visibility for standard_user', async ({ page }) => {
+  await prihlaseni(page, 'standard_user', 'secret_sauce');
+	
+  await page.locator('text=Sauce Labs Fleece Jacket').click();
+	
+  await expect(page.locator('[data-test="inventory-item-name"]')).toContainText('Sauce Labs Fleece Jacket');
+  await expect(page.locator('[data-test="secondary-header"]')).toContainText('Back to products');
+  await expect(page.locator('[data-test="item-sauce-labs-fleece-jacket-img"]')).toBeVisible();
+});
+
+test('picture visibility for problem_user', async ({ page }) => {
+  await prihlaseni(page, 'problem_user', 'secret_sauce');
+	
+  await page.locator('text=Sauce Labs Fleece Jacket').click();
+	
+  await expect(page.locator('[data-test="inventory-item-name"]')).toContainText('ITEM NOT FOUND');
+  await expect(page.locator('[data-test="secondary-header"]')).toContainText('Back to products');
+  //await expect(page.locator('[data-test="item-sauce-labs-fleece-jacket-img"]')).toBeVisible();
+});
+
+test('picture visibility for performance_glitch_user', async ({ page }) => {
+  await page.goto('https://www.saucedemo.com');
+
+  await page.getByPlaceholder('Username').fill('performance_glitch_user');
+  await page.getByPlaceholder('Password').fill('secret_sauce');
+  await page.getByRole('button').click();
+  
+  await page.locator('text=Sauce Labs Fleece Jacket').click();
+	
+  await expect(page.locator('[data-test="inventory-item-name"]')).toContainText('Sauce Labs Fleece Jacket');
+  await expect(page.locator('[data-test="secondary-header"]')).toContainText('Back to products');
+  await expect(page.locator('[data-test="item-sauce-labs-fleece-jacket-img"]')).toBeVisible();
+});
+
+test('picture visibility for error_user', async ({ page }) => {
+  await prihlaseni(page, 'error_user', 'secret_sauce');
+	
+  await page.locator('text=Sauce Labs Fleece Jacket').click();
+	
+  await expect(page.locator('[data-test="inventory-item-name"]')).toContainText('Sauce Labs Fleece Jacket');
+  await expect(page.locator('[data-test="secondary-header"]')).toContainText('Back to products');
+  await expect(page.locator('[data-test="item-sauce-labs-fleece-jacket-img"]')).toBeVisible();
+});
+
+
+// FUNKCE
+async function prihlaseni(page, uzivatelskeJmeno, heslo) {
+  await page.goto('https://www.saucedemo.com');
+  
+  await page.getByPlaceholder('Username').fill(uzivatelskeJmeno);
+  await page.getByPlaceholder('Password').fill(heslo);
+  await page.getByRole('button').click();
+}
