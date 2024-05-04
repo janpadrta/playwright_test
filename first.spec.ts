@@ -86,6 +86,19 @@ test('picture visibility for error_user', async ({ page }) => {
   await expect(page.locator('[data-test="item-sauce-labs-fleece-jacket-img"]')).toBeVisible();
 });
 
+// full test run
+test('full test for standard_user', async ({ page }) => {
+  await prihlaseni(page, 'standard_user', 'secret_sauce');
+  
+  await page.locator('text=Sauce Labs Fleece Jacket').click();
+  
+  const price = await page.locator('[data-test="inventory-item-price"]').textContent()
+  
+  await expect(price).toBe("$49.99");
+  
+  await page.locator('text=Add To Cart').click();
+});
+
 
 // FUNKCE
 async function prihlaseni(page, uzivatelskeJmeno, heslo) {
